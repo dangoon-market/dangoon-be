@@ -20,7 +20,7 @@ public class HashController {
 
     @RequestMapping("/hello")
     public String hello() {
-        return "fixed hello";
+        return "balanced hello";
     }
 
     private String getMD5Digest(String input) throws NoSuchAlgorithmException {
