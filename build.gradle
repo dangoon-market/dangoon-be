@@ -1,8 +1,17 @@
+// 라이브러리 버전 명시
+buildscript {
+	ext {
+		queryDslVersion = "5.0.0"
+	}
+}
+
 plugins {
 	id 'org.springframework.boot' version '2.7.2'
 	id 'io.spring.dependency-management' version '1.0.12.RELEASE'
 	id 'org.asciidoctor.convert' version '1.5.8'
 	id 'java'
+	// QueryDSL
+	id "com.ewerk.gradle.plugins.querydsl" version "1.0.10"
 }
 
 group = 'BTeam'
@@ -36,6 +45,10 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
 	testImplementation 'org.springframework.security:spring-security-test'
+
+	// QueryDSL
+	implementation "com.querydsl:querydsl-jpa:${queryDslVersion}"
+	implementation "com.querydsl:querydsl-apt:${queryDslVersion}"
 }
 
 tasks.named('test') {
@@ -46,4 +59,27 @@ tasks.named('test') {
 tasks.named('asciidoctor') {
 	inputs.dir snippetsDir
 	dependsOn test
+}
+
+// ---------------------------- ( QueryDSL ) ----------------------------
+// Q파일 생성 위치 설정
+def querydslDir = "$buildDir/generated/querydsl"
+
+querydsl {
+	jpa = true
+	querydslSourcesDir = querydslDir
+}
+sourceSets {
+	main.java.srcDir querydslDir
+}
+compileQuerydsl{
+	options.annotationProcessorPath = configurations.querydsl
+}
+configurations {
+	querydsl.extendsFrom compileClasspath
+}
+
+compileQuerydsl.doFirst {
+	if(file(querydslDir).exists() )
+		delete(file(querydslDir))
 }
